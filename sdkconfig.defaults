@@ -1,0 +1,47 @@
+# --- Target / flash ---
+CONFIG_IDF_TARGET="esp32p4"
+CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y
+CONFIG_PARTITION_TABLE_CUSTOM=y
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
+CONFIG_COMPILER_OPTIMIZATION_PERF=y
+
+# --- CPU / memory ---
+CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_360=y
+CONFIG_SPIRAM=y
+CONFIG_SPIRAM_SPEED_200M=y
+CONFIG_CACHE_L2_CACHE_256KB=y
+CONFIG_CACHE_L2_CACHE_LINE_128B=y
+CONFIG_FREERTOS_HZ=1000
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=8192
+
+# --- BSP: three DPI frame buffers for tear-free page flipping without waiting ---
+CONFIG_BSP_LCD_DPI_BUFFER_NUMS=3
+
+# --- LVGL ---
+CONFIG_LV_COLOR_DEPTH_16=y
+CONFIG_LV_OS_FREERTOS=y
+CONFIG_LV_USE_CLIB_MALLOC=y
+CONFIG_LV_USE_CLIB_STRING=y
+CONFIG_LV_USE_CLIB_SPRINTF=y
+CONFIG_LV_DEF_REFR_PERIOD=16
+# One software draw unit and no PPA draw unit: measured faster than two units and/or LVGL's PPA
+# fills (full redraw 29 ms vs 33-42 ms); the PPA is only used for the strip rotation
+CONFIG_LV_DRAW_SW_DRAW_UNIT_CNT=1
+# CONFIG_LV_USE_PPA is not set
+# Strips are handed to the PPA, which needs the L2 cache line alignment
+CONFIG_LV_DRAW_BUF_ALIGN=128
+# CONFIG_LV_USE_SYSMON is not set
+# CONFIG_LV_USE_PERF_MONITOR is not set
+# Built-in fonts used as fallback for LV_SYMBOL_* icons
+CONFIG_LV_FONT_MONTSERRAT_16=y
+CONFIG_LV_FONT_MONTSERRAT_20=y
+CONFIG_LV_FONT_MONTSERRAT_24=y
+CONFIG_LV_FONT_MONTSERRAT_32=y
+CONFIG_LV_USE_SNAPSHOT=y
+# Console on the USB-C port (USB Serial/JTAG) so the debug console can read input
+CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG=y
+# The display driver hands DPI frame buffers directly (no copy), so no DMA2D channel is reserved for it
+CONFIG_BSP_LCD_USE_DMA2D=n
+
+# Run code and read-only data (fonts) from PSRAM: the flash bus is slow (DIO 80 MHz)
+CONFIG_SPIRAM_XIP_FROM_PSRAM=y

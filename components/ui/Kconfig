@@ -1,0 +1,8 @@
+menu "Env monitor UI"
+    config UI_DEBUG_CONSOLE
+        bool "Debug console (screenshot / tap / drag over the serial console)"
+        default y
+        help
+            Development aid: "shot" dumps the screen (RLE + base64), "tap X Y" and
+            "drag X1 Y1 X2 Y2 MS" inject touch input. Read by tools/ui_remote.py.
+endmenu

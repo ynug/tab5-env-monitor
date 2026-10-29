@@ -1,0 +1,12 @@
+build/
+managed_components/
+sdkconfig
+sdkconfig.old
+.idea/
+cmake-build-*/
+.DS_Store
+# 元フォント（tools/fetch_fonts.sh で取得）
+assets/fonts/src/*.otf
+__pycache__/
+*.pyc
+.cache/
