@@ -20,6 +20,10 @@
 #define TREND_MIN   10
 #define CO2_CAUTION 1000.0f
 #define CO2_WARNING 1500.0f
+/* same thresholds as the alarms (SPEC §8.1) */
+#define TEMP_LOW    16.0f
+#define HUM_DRY     35.0f
+#define HUM_HUMID   70.0f
 
 typedef struct {
     const char *title;
@@ -42,6 +46,7 @@ typedef struct {
     lv_obj_t *value, *note, *trend, *spark;
     lv_draw_buf_t *spark_buf;
     float shown;        /* value currently displayed (hysteresis reference) */
+    lv_color_t color;   /* current value color (only restyled when it changes) */
 } card_t;
 
 /* Grid position of each card (row-major): temperature, humidity / pressure, CO2 */
@@ -50,6 +55,7 @@ static const int CARD_POS[M_COUNT] = {[M_TEMP] = 0, [M_HUM] = 1, [M_PRES] = 2, [
 static card_t s_card[M_COUNT];
 static lv_obj_t *s_co2_dot, *s_co2_state;
 static lv_obj_t *s_wbgt_dot, *s_wbgt_state;
+static lv_obj_t *s_hum_dot, *s_hum_state;
 
 static void set_text(lv_obj_t *l, const char *text)
 {
@@ -85,6 +91,7 @@ static void metric_card_create(lv_obj_t *page, int idx)
     const metric_def_t *m = &METRICS[idx];
     card_t *c = &s_card[idx];
     c->shown = NAN;
+    c->color = UI_COLOR_TEXT;
 
     lv_obj_t *card = ui_card_create(page);
     lv_obj_set_size(card, CARD_W, CARD_H);
@@ -126,7 +133,7 @@ static void metric_card_create(lv_obj_t *page, int idx)
     lv_obj_t *cap = ui_label_create(card, &font_jp_16, UI_COLOR_SUBTEXT, "直近1時間");
     lv_obj_align(cap, LV_ALIGN_BOTTOM_RIGHT, 0, 0);
 
-    if (idx == M_CO2 || idx == M_TEMP) {
+    if (idx == M_CO2 || idx == M_TEMP || idx == M_HUM) {
         lv_obj_t *chip = lv_obj_create(card);
         lv_obj_remove_style_all(chip);
         lv_obj_set_size(chip, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
@@ -145,10 +152,42 @@ static void metric_card_create(lv_obj_t *page, int idx)
         if (idx == M_CO2) {
             s_co2_dot = dot;
             s_co2_state = state;
+        } else if (idx == M_HUM) {
+            s_hum_dot = dot;
+            s_hum_state = state;
         } else {
             s_wbgt_dot = dot;
             s_wbgt_state = state;
         }
+    }
+}
+
+/* Value color: the normal text color until an alarm threshold is reached. Temperature turns
+ * yellow / red with the heat stroke risk (WBGT 警戒 / 厳重警戒 and above), like the heat alarms */
+static lv_color_t value_color(int m, const display_vals_t *d)
+{
+    float v = s_card[m].shown;
+    switch (m) {
+    case M_CO2:
+        return v >= CO2_WARNING ? UI_COLOR_BAD : v >= CO2_CAUTION ? UI_COLOR_WARN : UI_COLOR_TEXT;
+    case M_TEMP: {
+        if (v <= TEMP_LOW) return UI_COLOR_COOL;
+        if (!d->valid[M_HUM]) return UI_COLOR_TEXT;
+        int lv = derived_wbgt_level(derived_wbgt(d->value[M_TEMP], d->value[M_HUM]));
+        return lv >= 3 ? UI_COLOR_BAD : lv >= 2 ? UI_COLOR_WARN : UI_COLOR_TEXT;
+    }
+    case M_HUM:
+        return v <= HUM_DRY ? UI_COLOR_WARN : v >= HUM_HUMID ? UI_COLOR_COOL : UI_COLOR_TEXT;
+    default:
+        return UI_COLOR_TEXT;
+    }
+}
+
+static void set_value_color(card_t *c, lv_color_t col)
+{
+    if (!lv_color_eq(c->color, col)) {
+        c->color = col;
+        lv_obj_set_style_text_color(c->value, col, 0);
     }
 }
 
@@ -160,6 +199,7 @@ static void show_value(int m, const display_vals_t *d)
     if (!d->valid[m]) {
         c->shown = NAN;
         set_text(c->value, "---");
+        set_value_color(c, UI_COLOR_TEXT);
         return;
     }
     float v = d->value[m];
@@ -168,6 +208,7 @@ static void show_value(int m, const display_vals_t *d)
     }
     snprintf(buf, sizeof(buf), METRICS[m].fmt, c->shown);
     set_text(c->value, buf);
+    set_value_color(c, value_color(m, d));
 }
 
 static void show_co2_state(const display_vals_t *d)
@@ -182,6 +223,20 @@ static void show_co2_state(const display_vals_t *d)
     lv_color_t col = v >= CO2_WARNING ? UI_COLOR_BAD : v >= CO2_CAUTION ? UI_COLOR_WARN : UI_COLOR_GOOD;
     set_text(s_co2_state, txt);
     lv_obj_set_style_bg_color(s_co2_dot, col, 0);
+}
+
+static void show_hum_state(const display_vals_t *d)
+{
+    if (!d->valid[M_HUM]) {
+        set_text(s_hum_state, "");
+        lv_obj_set_style_bg_color(s_hum_dot, UI_COLOR_BORDER, 0);
+        return;
+    }
+    float v = s_card[M_HUM].shown;
+    const char *txt = v <= HUM_DRY ? "乾燥" : v >= HUM_HUMID ? "多湿" : "良好";
+    lv_color_t col = v <= HUM_DRY ? UI_COLOR_WARN : v >= HUM_HUMID ? UI_COLOR_COOL : UI_COLOR_GOOD;
+    set_text(s_hum_state, txt);
+    lv_obj_set_style_bg_color(s_hum_dot, col, 0);
 }
 
 /* Heat stroke risk (WBGT estimated from the temperature and humidity) in the temperature card */
@@ -212,6 +267,7 @@ static void refresh(lv_timer_t *t)
         show_value(m, d);
     }
     show_co2_state(d);
+    show_hum_state(d);
     show_wbgt(d);
 
     const char *sim = live.demo ? "・デモ" : live.sim ? "・模擬" : "";

@@ -11,7 +11,8 @@
 #define UI_COLOR_ACCENT     lv_color_hex(0x4FC3F7)
 #define UI_COLOR_GOOD       lv_color_hex(0x4CAF50)
 #define UI_COLOR_WARN       lv_color_hex(0xFFC107)
-#define UI_COLOR_BAD        lv_color_hex(0xF44336)
+#define UI_COLOR_BAD        lv_color_hex(0xFF6B5E)
+#define UI_COLOR_COOL       lv_color_hex(0x4FC3F7)   /* low temperature / humid */
 
 #define UI_STATUS_H         56
 #define UI_PAD              24
