@@ -32,6 +32,7 @@ M5Stack Tab5 に自作センサー基板（SCD41 / SHT35 / BMP581）を接続し
 - 電源: **3.3V 専用**（LDO なし）
 - プルアップ: SDA/SCL とも 4.7kΩ → 3V3_SENSOR
 - コネクタ: **Qwiic**（JST SH 1.0mm）1:GND 2:3V3 3:SDA 4:SCL
+- 製造データ: `hardware/EnvMonitor_SCD41-SHT35-BMP581_I2C/`（[hardware/README.md](../hardware/README.md)）
 
 ### 1.3 接続（実測済み 2026-10-17）
 
@@ -48,6 +49,7 @@ Tab5 **PORT.A**（HY2.0-4P）: `GND / Ext5V / G53(SDA) / G54(SCL)`
 
 - ⚠️ Grove 5V を Qwiic 赤線に直結しない（BMP581 の絶対最大定格超過）
 - センサー基板を接続する前に、Qwiic 3.3V–GND が約 3.3V であることを確認する
+- 基板版（`hardware/grove2qwiic-3v3/`）: レギュレーターは ME6211C33（1µF + 10µF のセラミックで安定）。手配線版は BA33DD0T + 22µF 電解
 
 ### 1.4 I2C バス設定
 
