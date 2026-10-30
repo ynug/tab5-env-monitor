@@ -28,7 +28,7 @@ M5Stack Tab5 に自作のセンサー基板をつないで、部屋の **CO2・�
 
 接続とセンサーの設定は [docs/SPEC.md](docs/SPEC.md) の「1. ハードウェア」にあります。
 
-センサー基板と変換基板の製造データ（JLCPCB 用のガーバー・BOM・部品の位置ファイル）と OSHWLab のリンクは [hardware/](hardware/README.md) にあります。自分で作りたい人はこちらを見てください。
+基板を自分で作りたい人へ: センサー基板の製造データ（JLCPCB 用のガーバー・BOM・部品の位置ファイル）は、ほかのプロジェクトと共通の別リポジトリ [env-sensor-board](https://github.com/ynug/env-sensor-board) にあります。Tab5 用の変換基板は [hardware/](hardware/README.md) にあります。
 
 > [!WARNING]
 > PORT.A の 5V をセンサー基板に直接つながないでください。BMP581 などの定格（3.3V）を超えます。
@@ -78,8 +78,15 @@ components/
   controller/        センサー・アラーム・音声・画面の明るさのつなぎ込み
   ui/                画面（センサー・グラフ・設定・デモ）
 docs/SPEC.md         仕様書（ハードウェア・画面・記録・アラームの詳細）
-hardware/            基板の製造データ（センサー基板・変換基板）
+hardware/            変換基板の製造データ（センサー基板は env-sensor-board リポジトリ）
 ```
+
+## 関連リポジトリ
+
+| リポジトリ | 内容 |
+|---|---|
+| [env-sensor-board](https://github.com/ynug/env-sensor-board) | センサー基板（SCD41 / SHT35 / BMP581）の製造データ。JLCPCB で部品実装まで注文できます |
+| [home-display](https://github.com/ynug/home-display) | 同じセンサー基板を Raspberry Pi につないで、カレンダー・天気・雨雲レーダーと一緒に室内の値を表示する情報ディスプレイ |
 
 ## クレジット
 

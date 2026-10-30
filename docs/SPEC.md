@@ -32,7 +32,7 @@ M5Stack Tab5 に自作センサー基板（SCD41 / SHT35 / BMP581）を接続し
 - 電源: **3.3V 専用**（LDO なし）
 - プルアップ: SDA/SCL とも 4.7kΩ → 3V3_SENSOR
 - コネクタ: **Qwiic**（JST SH 1.0mm）1:GND 2:3V3 3:SDA 4:SCL
-- 製造データ: `hardware/EnvMonitor_SCD41-SHT35-BMP581_I2C/`（[hardware/README.md](../hardware/README.md)）
+- 製造データ: 別リポジトリ [env-sensor-board](https://github.com/ynug/env-sensor-board)（Raspberry Pi 用の home-display と共通）
 
 ### 1.3 接続（実測済み 2026-10-17）
 
