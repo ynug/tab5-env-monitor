@@ -22,9 +22,6 @@ Tab5 PORT.A ──Grove ケーブル──> 変換基板 ──Qwiic ケーブ�
 | サイズ | 27.7 × 14.2 mm、2 層 |
 | OSHWLab | <https://oshwlab.com/yunayuna/project_aofrdeaz> |
 
-> [!NOTE]
-> OSHWLab のページは審査中のため、まだ開けないことがあります。開けない場合は、このフォルダのファイルで注文できます。
-
 ### 回路
 
 | 部品番号 | 部品 | LCSC 番号 |
